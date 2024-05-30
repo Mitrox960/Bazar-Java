@@ -39,6 +39,17 @@ public class ProductController {
         Product updatedProduct = productService.updateProduct(id, productDetails);
         return ResponseEntity.ok(updatedProduct);
     }
+    @GetMapping("/unsold-products")
+    public ResponseEntity<List<Product>> getUnsoldProducts(
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false, defaultValue = "id") String sortBy) {
+
+        // Récupérer tous les produits non vendus
+        List<Product> unsoldProducts = productService.getUnsoldProducts(maxPrice, sortBy);
+
+        // Retourner la liste des produits non vendus
+        return ResponseEntity.ok(unsoldProducts);
+    }
 
     @PostMapping("/api/users/{userId}/products")
     public Product createProductForUser(@PathVariable Long userId, @RequestBody Product product) {

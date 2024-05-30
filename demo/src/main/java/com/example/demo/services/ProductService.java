@@ -4,6 +4,7 @@ import com.example.demo.model.Product;
 import com.example.demo.model.User;
 import com.example.demo.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,15 @@ public class ProductService {
 
     public Product createProduct(Product product) {
         return productRepository.save(product);
+    }
+
+
+    public List<Product> getUnsoldProducts(Double maxPrice, String sortBy) {
+        if (maxPrice == null) {
+            return productRepository.findBySoldFalse(Sort.by(sortBy));
+        } else {
+            return productRepository.findBySoldFalseAndPriceLessThan(maxPrice, Sort.by(sortBy));
+        }
     }
 
     public List<Product> getAllProducts() {
