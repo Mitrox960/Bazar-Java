@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.model.Product;
+import com.example.demo.model.User;
 import com.example.demo.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,10 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+
+    public List<Product> getAllProductsForUser(User user) {
+        return productRepository.findByUser(user);
+    }
     public Optional<Product> getProductById(Long id) {
         return productRepository.findById(id);
     }

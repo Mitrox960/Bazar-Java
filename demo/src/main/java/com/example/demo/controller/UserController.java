@@ -1,6 +1,8 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.Product;
 import com.example.demo.model.User;
+import com.example.demo.services.ProductService;
 import com.example.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +17,25 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ProductService productService;
+
+
     public User createUser(User user) {
         return userService.createUser(user);
     }
+    @GetMapping("/{userId}/products")
+    public ResponseEntity<List<Product>> getAllProductsForUser(@PathVariable Long userId) {
+        // Récupérer l'utilisateur par ID
+        User user = userService.getUserById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Récupérer tous les produits associés à l'utilisateur
+        List<Product> products = productService.getAllProductsForUser(user);
+
+        // Retourner la liste des produits associés à l'utilisateur
+        return ResponseEntity.ok(products);
+    }
+
 
     public List<User> getAllUsers() {
         return userService.getAllUsers();
