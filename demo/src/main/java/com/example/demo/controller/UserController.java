@@ -45,5 +45,5 @@ public class UserController {
         } else {
             return ResponseEntity.status(404).build();
         }
-}
+    }
 }
