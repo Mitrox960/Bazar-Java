@@ -1,34 +1,49 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
-@Service
+@RestController
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     public User createUser(User user) {
-        return userRepository.save(user);
+        return userService.createUser(user);
     }
 
-    public String deleteUser(Long id) {
-        Optional<User> user = userRepository.findById(id);
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        Optional<User> user = userService.getUserById(id);
         if (user.isPresent()) {
-            userRepository.deleteById(id);
-            return "User deleted successfully";
+            return ResponseEntity.ok(user.get());
         } else {
-            return "User not found";
+            return ResponseEntity.status(404).body(null);
         }
     }
 
-    public User getUser(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        return user.orElse(null);
+    public ResponseEntity<User> updateUser(Long id, User userDetails) {
+        User updatedUser = userService.updateUser(id, userDetails);
+        return ResponseEntity.ok(updatedUser);
     }
+
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        Optional<User> user = userService.getUserById(id);
+        if (user.isPresent()) {
+            userService.deleteUser(id);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(404).build();
+        }
+}
 }
