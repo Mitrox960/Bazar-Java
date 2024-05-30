@@ -35,6 +35,13 @@ public class ProductRoutes {
         return productController.updateProduct(id, productDetails);
     }
 
+    @GetMapping("/unsold-products")
+    public ResponseEntity<List<Product>> getUnsoldProducts(
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false, defaultValue = "id") String sortBy) {
+        return productController.getUnsoldProducts(maxPrice, sortBy);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         return productController.deleteProduct(id);

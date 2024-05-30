@@ -2,19 +2,12 @@ package com.example.demo.routes;
 
 import com.example.demo.controller.UserController;
 import com.example.demo.model.User;
+import com.example.demo.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.ServerResponse;
-import org.springframework.web.servlet.function.RouterFunctions;
-import org.springframework.web.servlet.function.ServerRequest;
 
 import java.util.List;
-
-import static org.springframework.web.servlet.function.RequestPredicates.*;
-import static org.springframework.web.servlet.function.RouterFunctions.route;
 
 @RestController
 @RequestMapping("/api/users")
@@ -43,8 +36,31 @@ public class UserRoutes {
         return userController.updateUser(id, userDetails);
     }
 
+    @DeleteMapping("/{userId}/products/{productId}")
+    public ResponseEntity<Void> deleteProductForUser(@PathVariable Long userId, @PathVariable Long productId) {
+        return userController.deleteProductForUser(userId, productId);
+    }
+
+    @PutMapping("/{userId}/products/{productId}")
+    public ResponseEntity<Product> updateProductForUser(@PathVariable Long userId, @PathVariable Long productId, @RequestBody Product productDetails) {
+        return userController.updateProductForUser(userId, productId, productDetails);
+    }
+    @GetMapping("/{userId}/products")
+    public ResponseEntity<List<Product>> getAllProductsForUser(@PathVariable Long userId) {
+        return userController.getAllProductsForUser(userId);
+    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         return userController.deleteUser(id);
+    }
+
+    @PatchMapping("/{userId}/products/{productId}/sell")
+    public ResponseEntity<Void> sellProduct(@PathVariable Long userId, @PathVariable Long productId) {
+        return userController.sellProduct(userId, productId);
+    }
+
+    @PostMapping("/{userId}/products")
+    public Product createProductForUser(@PathVariable Long userId, @RequestBody Product product) {
+        return userController.createProductForUser(userId, product);
     }
 }

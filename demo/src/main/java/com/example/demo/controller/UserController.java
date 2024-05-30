@@ -7,12 +7,12 @@ import com.example.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
 
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Controller
 public class UserController {
 
     @Autowired
@@ -21,80 +21,73 @@ public class UserController {
     @Autowired
     private ProductService productService;
 
-
     public User createUser(User user) {
         return userService.createUser(user);
     }
-    @GetMapping("/api/users/{userId}/products")
-    public ResponseEntity<List<Product>> getAllProductsForUser(@PathVariable Long userId) {
-        // Récupérer l'utilisateur par ID
+
+    public ResponseEntity<List<Product>> getAllProductsForUser(Long userId) {
         User user = userService.getUserById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Récupérer tous les produits associés à l'utilisateur
         List<Product> products = productService.getAllProductsForUser(user);
-
-        // Retourner la liste des produits associés à l'utilisateur
         return ResponseEntity.ok(products);
     }
 
-    // UserController
-    @DeleteMapping("/api/users/{userId}/products/{productId}") // <-- URL pour supprimer un produit d'un utilisateur
-    public ResponseEntity<Void> deleteProductForUser(@PathVariable Long userId, @PathVariable Long productId) {
-        // Vérifier si l'utilisateur existe
+    public ResponseEntity<Void> deleteProductForUser(Long userId, Long productId) {
         Optional<User> userOptional = userService.getUserById(userId);
         if (userOptional.isPresent()) {
-            // Récupérer l'utilisateur
             User user = userOptional.get();
-
-            // Vérifier si le produit appartient à l'utilisateur
             Optional<Product> productOptional = productService.getProductById(productId);
             if (productOptional.isPresent() && productOptional.get().getUser().getId().equals(userId)) {
-                // Supprimer le produit
                 productService.deleteProduct(productId);
                 return ResponseEntity.ok().build();
             } else {
-                // Le produit n'appartient pas à l'utilisateur
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         } else {
-            // L'utilisateur n'existe pas
             return ResponseEntity.notFound().build();
         }
     }
 
-
-
-    // UserController
-    @PutMapping("/api/users/{userId}/products/{productId}") // <-- URL pour mettre à jour un produit d'un utilisateur
-    public ResponseEntity<Product> updateProductForUser(@PathVariable Long userId, @PathVariable Long productId, @RequestBody Product productDetails) {
-        // Vérifier si l'utilisateur existe
+    public ResponseEntity<Product> updateProductForUser(Long userId, Long productId, Product productDetails) {
         Optional<User> userOptional = userService.getUserById(userId);
         if (userOptional.isPresent()) {
-            // Récupérer l'utilisateur
             User user = userOptional.get();
-
-            // Vérifier si le produit appartient à l'utilisateur
             Optional<Product> productOptional = productService.getProductById(productId);
             if (productOptional.isPresent() && productOptional.get().getUser().getId().equals(userId)) {
-                // Mettre à jour les détails du produit
                 Product updatedProduct = productService.updateProduct(productId, productDetails);
                 return ResponseEntity.ok(updatedProduct);
             } else {
-                // Le produit n'appartient pas à l'utilisateur
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         } else {
-            // L'utilisateur n'existe pas
             return ResponseEntity.notFound().build();
         }
     }
-
 
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<Void> sellProduct(Long userId, Long productId) {
+        Optional<User> userOptional = userService.getUserById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            Optional<Product> productOptional = productService.getProductById(productId);
+            if (productOptional.isPresent() && productOptional.get().getUser().getId().equals(userId)) {
+                Product product = productOptional.get();
+                product.setSold(true);
+                productService.updateProduct(productId, product);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
+    public ResponseEntity<User> getUserById(Long id) {
         Optional<User> user = userService.getUserById(id);
         if (user.isPresent()) {
             return ResponseEntity.ok(user.get());
@@ -108,7 +101,7 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(Long id) {
         Optional<User> user = userService.getUserById(id);
         if (user.isPresent()) {
             userService.deleteUser(id);
@@ -116,5 +109,12 @@ public class UserController {
         } else {
             return ResponseEntity.status(404).build();
         }
+    }
+
+
+    public Product createProductForUser(Long userId, Product product) {
+        User user = userService.getUserById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        product.setUser(user);
+        return productService.createProduct(product);
     }
 }
